@@ -12,6 +12,11 @@ const registeredServices = {};
 // for callbacks.
 OAuth._requestHandlers = {};
 
+OAuth.setupMultiTenancy = ({ tenantIdFromRequest }) => {
+  if (tenantIdFromRequest) {
+    OAuth._tenantIdFromRequest = tenantIdFromRequest;
+  }
+};
 
 // Register a handler for an OAuth service. The handler will be called
 // when we get an incoming http request on /_oauth/{serviceName}. This
@@ -154,8 +159,7 @@ const middleware = (req, res, next) => {
     if (!service)
       throw new Error(`Unexpected OAuth service ${serviceName}`);
 
-    // Make sure we're configured
-    ensureConfigured(serviceName);
+    const tenantId = OAuth._tenantIdFromRequest?.(req);
 
     const handler = OAuth._requestHandlers[service.version];
     if (!handler)
@@ -167,7 +171,7 @@ const middleware = (req, res, next) => {
       requestData = req.body;
     }
 
-    handler(service, requestData, res);
+    handler(service, { ...requestData, tenantId }, res);
   } catch (err) {
     // if we got thrown an error, save it off, it will get passed to
     // the appropriate login call (if any) and reported there.
@@ -233,13 +237,6 @@ const oauthServiceName = req => {
   // Find service based on url
   const serviceName = splitPath[2];
   return serviceName;
-};
-
-// Make sure we're configured
-const ensureConfigured = serviceName => {
-  if (!ServiceConfiguration.configurations.findOne({service: serviceName})) {
-    throw new ServiceConfiguration.ConfigError();
-  }
 };
 
 const isSafe = value => {
