@@ -56,7 +56,6 @@ OAuth._redirectUri = (serviceName, config, params, absoluteUrlOptions) => {
   const { rootUrl } = config;
 
   return URL._constructUrl(
-    Meteor.absoluteUrl(`_oauth/${serviceName}`, absoluteUrlOptions),
     Meteor.absoluteUrl(`_oauth/${serviceName}`, {
       rootUrl,
       ...absoluteUrlOptions,

@@ -1,6 +1,6 @@
 Package.describe({
   summary: "Common code for OAuth-based services",
-  version: "1.3.1",
+  version: "1.3.2",
   name: 'pathable:oauth',
   git: 'https://github.com/pathable/oauth',
 });
